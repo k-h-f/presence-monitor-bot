@@ -2,6 +2,7 @@ import { Client, VoiceState } from 'discord.js';
 import { getConfig } from './getConfig';
 import { httpRequest } from './httpService/http';
 import * as commandModules from './commands/commandFiles';
+import { SELECT_BOT_CUSTOM_ID } from './commands/commandFiles/monitorbots';
 
 const { PRESENCE_API_URL } = getConfig();
 
@@ -55,6 +56,12 @@ class EventHandler {
    */
   interactionCreate() {
     this.client.on('interactionCreate', async (interaction) => {
+      if (interaction.isSelectMenu()) {
+        if (interaction.customId === SELECT_BOT_CUSTOM_ID) {
+          //TODO
+        }
+      }
+
       if (!interaction.isCommand()) {
         return;
       }

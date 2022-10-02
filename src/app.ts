@@ -14,6 +14,7 @@ const DISCORD_TOKEN = getConfig().DISCORD_TOKEN;
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMessages
   ]
