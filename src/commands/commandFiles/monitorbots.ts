@@ -2,6 +2,7 @@ import {
   ActionRowBuilder,
   ChatInputCommandInteraction,
   Client,
+  EmbedBuilder,
   SelectMenuBuilder,
   SlashCommandBuilder
 } from 'discord.js';
@@ -35,21 +36,30 @@ export const execute = async (
     return;
   }
 
-  const botOptions = bots
-    ?.filter((bot) => !monitoredBots.bots.includes(parseInt(bot.id)))
-    .map((bot) => {
-      return {
-        label: bot.displayName,
-        value: bot.id
-      };
-    });
+  const botOptions = bots.map((bot) => {
+    return {
+      label: bot.displayName,
+      value: bot.id,
+      default: monitoredBots.bots.includes(parseInt(bot.id))
+    };
+  });
+
+  const embed = new EmbedBuilder().setTitle('Select bots to monitor');
 
   const row = new ActionRowBuilder().addComponents(
     new SelectMenuBuilder()
       .setCustomId(SELECT_BOT_CUSTOM_ID)
+      .setMinValues(0)
+      .setMaxValues(botOptions.length)
       .setPlaceholder('Nothing selected')
       .addOptions(botOptions)
   );
 
-  await interaction.reply({ components: [row] });
+  //have to use any here to avoid compilation error
+  //this may be a bug in discordjs
+  await interaction.reply({
+    ephemeral: true,
+    embeds: [embed],
+    components: [row as any]
+  });
 };

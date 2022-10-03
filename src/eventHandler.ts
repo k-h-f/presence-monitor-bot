@@ -55,10 +55,21 @@ class EventHandler {
    * When a message from a user that is a command
    */
   interactionCreate() {
+    const { PRESENCE_API_URL } = getConfig();
+
     this.client.on('interactionCreate', async (interaction) => {
       if (interaction.isSelectMenu()) {
         if (interaction.customId === SELECT_BOT_CUSTOM_ID) {
-          //TODO
+          await httpRequest(
+            'post',
+            `${PRESENCE_API_URL}/update/${interaction.guildId}/bots`,
+            {
+              body: {
+                bots: interaction.values
+              }
+            }
+          );
+          await interaction.reply('saved');
         }
       }
 
