@@ -11,6 +11,7 @@ import { httpRequest } from '../../httpService/http';
 import { BotsResponse } from '../../httpService/responseTypes';
 
 export const SELECT_BOT_CUSTOM_ID = 'selectbot';
+export const SELECT_CHANNEL_CUSTOM_ID = 'selectchannel';
 
 export const data = new SlashCommandBuilder()
   .setName('monitorbots')

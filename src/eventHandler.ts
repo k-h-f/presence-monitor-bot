@@ -62,7 +62,7 @@ class EventHandler {
         if (interaction.customId === SELECT_BOT_CUSTOM_ID) {
           await httpRequest(
             'post',
-            `${PRESENCE_API_URL}/update/${interaction.guildId}/bots`,
+            `${PRESENCE_API_URL}/monitoring/${interaction.guildId}`,
             {
               body: {
                 bots: interaction.values
