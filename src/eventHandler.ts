@@ -48,6 +48,7 @@ class EventHandler {
   presenceUpdate() {
     this.client.on('presenceUpdate', (data) => {
       console.log(data);
+        
     });
   }
 
@@ -62,7 +63,7 @@ class EventHandler {
         if (interaction.customId === SELECT_BOT_CUSTOM_ID) {
           await httpRequest(
             'post',
-            `${PRESENCE_API_URL}/monitoring/${interaction.guildId}`,
+            `${PRESENCE_API_URL}/update/${interaction.guildId}`,
             {
               body: {
                 bots: interaction.values
