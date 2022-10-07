@@ -1,3 +1,4 @@
-export interface BotsResponse {
-  bots: number[];
+export interface MonitoringResponse {
+  bots: string[];
+  channelId: string;
 }

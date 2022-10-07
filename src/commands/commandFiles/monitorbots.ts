@@ -3,14 +3,15 @@ import {
   ChatInputCommandInteraction,
   Client,
   EmbedBuilder,
+  NonThreadGuildBasedChannel,
   SelectMenuBuilder,
   SlashCommandBuilder
 } from 'discord.js';
+import InteractionHandler from '../../eventHandler/interactionHandler';
+
 import { getConfig } from '../../getConfig';
 import { httpRequest } from '../../httpService/http';
-import { BotsResponse } from '../../httpService/responseTypes';
-
-export const SELECT_BOT_CUSTOM_ID = 'selectbot';
+import { MonitoringResponse } from '../../httpService/responseTypes';
 
 export const data = new SlashCommandBuilder()
   .setName('monitorbots')
@@ -20,19 +21,25 @@ export const execute = async (
   interaction: ChatInputCommandInteraction,
   client: Client
 ) => {
+  const interactionHandler = new InteractionHandler();
+
   const { PRESENCE_API_URL } = getConfig();
+  const { SELECT_BOT, SELECT_CHANNEL } = interactionHandler.getCustomIds();
+
   //Get all bots from server
   const members = await interaction.guild?.members.fetch();
   const bots = members?.filter((member) => member.user.bot);
 
   //Get all bots that is being monitored right now
-  const monitoredBots: BotsResponse = await httpRequest(
+  const monitoredInfo: MonitoringResponse = await httpRequest(
     'get',
-    `${PRESENCE_API_URL}/bots/${interaction.guildId}`
+    `${PRESENCE_API_URL}/monitoring/${interaction.guildId}`
   );
 
   if (!bots) {
-    interaction.reply('Something went wrong...');
+    interaction.reply(
+      'Something went wrong... Could not find bots using Discord API'
+    );
     return;
   }
 
@@ -40,19 +47,53 @@ export const execute = async (
     return {
       label: bot.displayName,
       value: bot.id,
-      default: monitoredBots.bots.includes(parseInt(bot.id))
+      default: monitoredInfo.bots
+        ? monitoredInfo.bots.includes(bot.user.id)
+        : false
     };
   });
 
   const embed = new EmbedBuilder().setTitle('Select bots to monitor');
 
-  const row = new ActionRowBuilder().addComponents(
+  const selectBotsRow = new ActionRowBuilder().addComponents(
     new SelectMenuBuilder()
-      .setCustomId(SELECT_BOT_CUSTOM_ID)
+      .setCustomId(SELECT_BOT)
       .setMinValues(0)
       .setMaxValues(botOptions.length)
       .setPlaceholder('Nothing selected')
       .addOptions(botOptions)
+  );
+
+  //Get all channels
+  const channels = await interaction.guild?.channels.fetch();
+
+  if (!channels) {
+    interaction.reply(
+      'Something went wrong... Could not find channels using Discord API'
+    );
+    return;
+  }
+
+  const channelOptions = channels
+    .filter(
+      (channel): channel is NonThreadGuildBasedChannel =>
+        channel !== null && channel.isTextBased()
+    )
+    .map((channel) => {
+      return {
+        label: channel.name,
+        value: channel.id,
+        default: channel.id === monitoredInfo.channelId
+      };
+    });
+
+  const selectChannelRow = new ActionRowBuilder().addComponents(
+    new SelectMenuBuilder()
+      .setCustomId(SELECT_CHANNEL)
+      .setMinValues(1)
+      .setMaxValues(1)
+      .setPlaceholder('Nothing selected')
+      .addOptions(channelOptions)
   );
 
   //have to use any here to avoid compilation error
@@ -60,6 +101,6 @@ export const execute = async (
   await interaction.reply({
     ephemeral: true,
     embeds: [embed],
-    components: [row as any]
+    components: [selectBotsRow as any, selectChannelRow as any]
   });
 };

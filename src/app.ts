@@ -6,7 +6,7 @@ import './commands/deploy-commands';
 // Require the necessary discord.js classes
 import { Client, GatewayIntentBits } from 'discord.js';
 import { getConfig } from './getConfig';
-import EventHandler from './eventHandler';
+import EventHandler from './eventHandler/eventHandler';
 
 const DISCORD_TOKEN = getConfig().DISCORD_TOKEN;
 
