@@ -7,12 +7,11 @@ import {
   SelectMenuBuilder,
   SlashCommandBuilder
 } from 'discord.js';
+import InteractionHandler from '../../eventHandler/interactionHandler';
+
 import { getConfig } from '../../getConfig';
 import { httpRequest } from '../../httpService/http';
 import { MonitoringResponse } from '../../httpService/responseTypes';
-
-export const SELECT_BOT_CUSTOM_ID = 'selectbot';
-export const SELECT_CHANNEL_CUSTOM_ID = 'selectchannel';
 
 export const data = new SlashCommandBuilder()
   .setName('monitorbots')
@@ -22,7 +21,11 @@ export const execute = async (
   interaction: ChatInputCommandInteraction,
   client: Client
 ) => {
+  const interactionHandler = new InteractionHandler();
+
   const { PRESENCE_API_URL } = getConfig();
+  const { SELECT_BOT, SELECT_CHANNEL } = interactionHandler.getCustomIds();
+
   //Get all bots from server
   const members = await interaction.guild?.members.fetch();
   const bots = members?.filter((member) => member.user.bot);
@@ -44,7 +47,9 @@ export const execute = async (
     return {
       label: bot.displayName,
       value: bot.id,
-      default: monitoredInfo.bots.includes(bot.user.id)
+      default: monitoredInfo.bots
+        ? monitoredInfo.bots.includes(bot.user.id)
+        : false
     };
   });
 
@@ -52,7 +57,7 @@ export const execute = async (
 
   const selectBotsRow = new ActionRowBuilder().addComponents(
     new SelectMenuBuilder()
-      .setCustomId(SELECT_BOT_CUSTOM_ID)
+      .setCustomId(SELECT_BOT)
       .setMinValues(0)
       .setMaxValues(botOptions.length)
       .setPlaceholder('Nothing selected')
@@ -82,9 +87,9 @@ export const execute = async (
       };
     });
 
-  const selectChannlRow = new ActionRowBuilder().addComponents(
+  const selectChannelRow = new ActionRowBuilder().addComponents(
     new SelectMenuBuilder()
-      .setCustomId(SELECT_CHANNEL_CUSTOM_ID)
+      .setCustomId(SELECT_CHANNEL)
       .setMinValues(1)
       .setMaxValues(1)
       .setPlaceholder('Nothing selected')
@@ -96,6 +101,6 @@ export const execute = async (
   await interaction.reply({
     ephemeral: true,
     embeds: [embed],
-    components: [selectBotsRow as any, selectChannlRow]
+    components: [selectBotsRow as any, selectChannelRow as any]
   });
 };
