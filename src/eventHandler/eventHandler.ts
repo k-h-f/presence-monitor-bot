@@ -1,18 +1,15 @@
 import {
   Client,
+  Interaction,
   Presence,
   PresenceUpdateStatus,
-  TextChannel,
-  VoiceState
+  TextChannel
 } from 'discord.js';
 import { getConfig } from '../getConfig';
 import * as commandModules from '../commands/commandFiles';
 import InteractionHandler from './interactionHandler';
 import { httpRequest } from '../httpService/http';
 import { MonitoringResponse } from '../httpService/responseTypes';
-import { channel } from 'diagnostics_channel';
-
-const { PRESENCE_API_URL } = getConfig();
 
 /**
  * EventHandler handles all Discord events in one place by taking a Discord client and attaches
@@ -39,75 +36,72 @@ class EventHandler {
    * Otherwise, the event won't be listened to
    */
   initEvents() {
-    this.ready();
-    this.presenceUpdate();
-    this.interactionCreate();
+    this.client.on('ready', () => this.ready());
+    this.client.on('presenceUpdate', (data) => this.presenceUpdate(data));
+    this.client.on('interactionCreate', (data) => this.interactionCreate(data));
   }
 
   /**
    * When the client is ready, this event is triggered
    */
   ready() {
-    this.client.once('ready', () => {
-      console.log('READY');
-    });
+    console.log('READY');
   }
 
-  presenceUpdate() {
-    this.client.on('presenceUpdate', async (data) => {
-      if (!data || !data.member || !data.member.user.bot) {
-        return;
+  async presenceUpdate(data: Presence | null) {
+    if (!data || !data.member || !data.member.user.bot) {
+      return;
+    }
+
+    const { PRESENCE_API_URL } = getConfig();
+    const monitoredBots: MonitoringResponse = await httpRequest(
+      'GET',
+      `${PRESENCE_API_URL}/monitoring/${data.guild?.id}`
+    );
+
+    const { bots, channelId } = monitoredBots;
+
+    const isMonitored = bots.includes(data.member.id);
+    if (data.status === PresenceUpdateStatus.Offline && isMonitored) {
+      const channel = this.client.channels.cache.get(channelId);
+      console.log(channel);
+      if (!channel) {
+        //Send to default channel
+        const defaultChannel = this.client.channels.cache
+          .filter((channel) => channel.isTextBased())
+          .at(0);
+        (defaultChannel as TextChannel).send(
+          `Bot ${data.member.displayName} is offline!`
+        );
+      } else {
+        (channel as TextChannel).send(`${data.member.displayName} is offline!`);
       }
-
-      const { PRESENCE_API_URL } = getConfig();
-      const monitoredBots: MonitoringResponse = await httpRequest(
-        'GET',
-        `${PRESENCE_API_URL}/monitoring/${data.guild?.id}`
-      );
-
-      const { bots, channelId } = monitoredBots;
-
-      const isMonitored = bots.includes(data.member.id);
-
-      if (data.status === PresenceUpdateStatus.Offline && isMonitored) {
-        const channel = this.client.channels.cache.get(channelId);
-        if (!channel) {
-          //Send to default channel
-          const defaultChannel = this.client.channels.cache
-            .filter((channel) => channel.isTextBased())
-            .at(0);
-          (defaultChannel as TextChannel).send(`Bot ${data.member.id} is down`);
-        }
-        (channel as TextChannel).send(`Bot ${data.member.id} is offline!`);
-      }
-    });
+    }
   }
 
   /**
    * When a message from a user that is a command
    */
-  interactionCreate() {
-    this.client.on('interactionCreate', async (interaction) => {
-      if (interaction.isSelectMenu()) {
-        await interaction.deferReply();
+  async interactionCreate(interaction: Interaction) {
+    if (interaction.isSelectMenu()) {
+      await interaction.deferReply();
 
-        const interactionHandler = new InteractionHandler();
+      const interactionHandler = new InteractionHandler();
 
-        interactionHandler.handleSelectMenuInteractionEvent(
-          interaction.customId,
-          interaction
-        );
+      interactionHandler.handleSelectMenuInteractionEvent(
+        interaction.customId,
+        interaction
+      );
 
-        await interaction.deleteReply();
-      }
+      await interaction.deleteReply();
+    }
 
-      if (!interaction.isCommand()) {
-        return;
-      }
+    if (!interaction.isCommand()) {
+      return;
+    }
 
-      const { commandName } = interaction;
-      this.commands[commandName].execute(interaction, this.client);
-    });
+    const { commandName } = interaction;
+    this.commands[commandName].execute(interaction, this.client);
   }
 }
 

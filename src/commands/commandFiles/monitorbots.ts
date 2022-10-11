@@ -17,10 +17,7 @@ export const data = new SlashCommandBuilder()
   .setName('monitorbots')
   .setDescription('Will allow users to set the bots to monitor');
 
-export const execute = async (
-  interaction: ChatInputCommandInteraction,
-  client: Client
-) => {
+export const execute = async (interaction: ChatInputCommandInteraction) => {
   const interactionHandler = new InteractionHandler();
 
   const { PRESENCE_API_URL } = getConfig();
