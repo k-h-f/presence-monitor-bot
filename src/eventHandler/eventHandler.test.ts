@@ -21,9 +21,9 @@ const mockDiscordClient: Partial<Client> = {
   } as any
 };
 
-mockDiscordClientGet.mockReturnValue({
-  channel: { send: mockDiscordClientSend }
-});
+mockDiscordClientGet.mockImplementation(() => ({
+  send: mockDiscordClientSend
+}));
 mockDiscordClientFilter.mockImplementationOnce(() => ({ at: jest.fn() }));
 
 describe('eventHandler', () => {
@@ -35,17 +35,17 @@ describe('eventHandler', () => {
     beforeEach(() => {
       mockHttpRequest.mockReturnValue({ bots: [] });
     });
-    it('should not alert if data is null', () => {
+    it('should not alert if data is null', async () => {
       const eventHandler = new EventHandler({} as Client);
-      eventHandler.presenceUpdate(null);
+      await eventHandler.presenceUpdate(null);
 
       expect(mockHttpRequest).not.toHaveBeenCalled();
       expect(mockDiscordClientGet).not.toHaveBeenCalled();
     });
 
-    it('should call the http service with the correct url/body', () => {
+    it('should call the http service with the correct url/body', async () => {
       const eventHandler = new EventHandler({} as Client);
-      eventHandler.presenceUpdate({
+      await eventHandler.presenceUpdate({
         status: 'offline',
         guild: { id: '1' } as Partial<Guild>,
         member: {
@@ -61,13 +61,13 @@ describe('eventHandler', () => {
       );
     });
 
-    it('should send an alert to the channel if it is a monitored bot', () => {
+    it('should send an alert to the channel if it is a monitored bot', async () => {
       mockHttpRequest.mockReturnValue({
         bots: ['123'],
         channelId: 'channelId456'
       });
       const eventHandler = new EventHandler(mockDiscordClient as Client);
-      eventHandler.presenceUpdate({
+      await eventHandler.presenceUpdate({
         status: 'offline',
         guild: { id: '1' } as Partial<Guild>,
         member: {
@@ -80,10 +80,11 @@ describe('eventHandler', () => {
       } as Presence);
 
       expect(mockDiscordClientGet).toHaveBeenCalledWith('channelId456');
-      expect(mockDiscordClientFilter).toHaveBeenCalled();
       expect(mockDiscordClientSend).toHaveBeenCalledWith(
-        'monitored is offline!'
+        'monitored bot is offline!'
       );
     });
+
+    it('should send an alert to the default channel', async () => {});
   });
 });

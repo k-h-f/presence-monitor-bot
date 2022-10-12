@@ -63,18 +63,18 @@ class EventHandler {
 
     const isMonitored = bots.includes(data.member.id);
     if (data.status === PresenceUpdateStatus.Offline && isMonitored) {
-      const channel = this.client.channels.cache.get(channelId);
-      console.log(channel);
+      const channel = this.client.channels.cache.get(channelId) as TextChannel;
+
       if (!channel) {
         //Send to default channel
         const defaultChannel = this.client.channels.cache
           .filter((channel) => channel.isTextBased())
-          .at(0);
-        (defaultChannel as TextChannel).send(
-          `Bot ${data.member.displayName} is offline!`
-        );
+          .at(0) as TextChannel;
+
+        defaultChannel.send(`Bot ${data.member.displayName} is offline!`);
       } else {
-        (channel as TextChannel).send(`${data.member.displayName} is offline!`);
+        const temp = channel as TextChannel;
+        channel.send(`${data.member.displayName} is offline!`);
       }
     }
   }
