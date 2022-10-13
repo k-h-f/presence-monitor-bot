@@ -1,4 +1,4 @@
-import { Interaction, SelectMenuInteraction } from 'discord.js';
+import { SelectMenuInteraction } from 'discord.js';
 import { getConfig } from '../getConfig';
 import { httpRequest } from '../httpService/http';
 

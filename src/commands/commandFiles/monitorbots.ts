@@ -1,7 +1,6 @@
 import {
   ActionRowBuilder,
   ChatInputCommandInteraction,
-  Client,
   EmbedBuilder,
   NonThreadGuildBasedChannel,
   SelectMenuBuilder,

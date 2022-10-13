@@ -1,4 +1,4 @@
-import { Channel, Client, Guild, Presence } from 'discord.js';
+import { Client, Guild, Presence } from 'discord.js';
 import { getConfig } from '../getConfig';
 import { httpRequest } from '../httpService/http';
 import EventHandler from './eventHandler';
@@ -17,14 +17,24 @@ const mockHttpRequest = httpRequest as jest.Mock<any>;
 const mockConfig = getConfig as jest.Mock<any>;
 const mockDiscordClient: Partial<Client> = {
   channels: {
-    cache: { get: mockDiscordClientGet, filter: mockDiscordClientFilter }
+    cache: {
+      get: mockDiscordClientGet,
+      filter: mockDiscordClientFilter.mockImplementation(() => {
+        return {
+          at: () => {
+            return {
+              send: mockDiscordClientSend
+            };
+          }
+        };
+      })
+    }
   } as any
 };
 
 mockDiscordClientGet.mockImplementation(() => ({
   send: mockDiscordClientSend
 }));
-mockDiscordClientFilter.mockImplementationOnce(() => ({ at: jest.fn() }));
 
 describe('eventHandler', () => {
   beforeEach(() => {
@@ -85,6 +95,31 @@ describe('eventHandler', () => {
       );
     });
 
-    it('should send an alert to the default channel', async () => {});
+    it('should send an alert to the default channel', async () => {
+      mockHttpRequest.mockReturnValue({
+        bots: ['123']
+      });
+
+      //resetting mocks mimics undefined channel being returned from api
+      mockDiscordClientGet.mockReset();
+
+      const eventHandler = new EventHandler(mockDiscordClient as Client);
+      await eventHandler.presenceUpdate({
+        status: 'offline',
+        guild: { id: '1' } as Partial<Guild>,
+        member: {
+          displayName: 'monitored bot',
+          id: '123',
+          user: {
+            bot: true
+          }
+        }
+      } as Presence);
+
+      expect(mockDiscordClientFilter).toHaveBeenCalled();
+      expect(mockDiscordClientSend).toHaveBeenCalledWith(
+        'monitored bot is offline!'
+      );
+    });
   });
 });

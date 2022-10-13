@@ -71,9 +71,8 @@ class EventHandler {
           .filter((channel) => channel.isTextBased())
           .at(0) as TextChannel;
 
-        defaultChannel.send(`Bot ${data.member.displayName} is offline!`);
+        defaultChannel.send(`${data.member.displayName} is offline!`);
       } else {
-        const temp = channel as TextChannel;
         channel.send(`${data.member.displayName} is offline!`);
       }
     }
