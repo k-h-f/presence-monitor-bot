@@ -6,11 +6,18 @@ import EventHandler from './eventHandler';
 jest.mock('discord.js', () => ({
   PresenceUpdateStatus: { Online: 'online', Offline: 'offline' }
 }));
-jest.mock('../commands/commandFiles', () => {});
+jest.mock('../commands/commandFiles', () => ({
+  randomCommand: {
+    execute: () => {
+      mockExecute();
+    }
+  }
+}));
 jest.mock('../httpService/http');
 jest.mock('../getConfig');
 
 const mockDiscordClientGet = jest.fn();
+const mockExecute = jest.fn();
 const mockDiscordClientFilter = jest.fn();
 const mockDiscordClientSend = jest.fn();
 const mockHttpRequest = httpRequest as jest.Mock<any>;
@@ -19,15 +26,11 @@ const mockDiscordClient: Partial<Client> = {
   channels: {
     cache: {
       get: mockDiscordClientGet,
-      filter: mockDiscordClientFilter.mockImplementation(() => {
-        return {
-          at: () => {
-            return {
-              send: mockDiscordClientSend
-            };
-          }
-        };
-      })
+      filter: mockDiscordClientFilter.mockImplementation(() => ({
+        at: () => ({
+          send: mockDiscordClientSend
+        })
+      }))
     }
   } as any
 };
@@ -37,12 +40,11 @@ mockDiscordClientGet.mockImplementation(() => ({
 }));
 
 describe('eventHandler', () => {
-  beforeEach(() => {
-    mockConfig.mockReturnValue({ PRESENCE_API_URL: 'presence-api.com' });
-  });
+  beforeEach(() => {});
 
   describe('presenceUpdate', () => {
     beforeEach(() => {
+      mockConfig.mockReturnValue({ PRESENCE_API_URL: 'presence-api.com' });
       mockHttpRequest.mockReturnValue({ bots: [] });
     });
     it('should not alert if data is null', async () => {
@@ -121,5 +123,31 @@ describe('eventHandler', () => {
         'monitored bot is offline!'
       );
     });
+  });
+
+  describe('interactionCreate', () => {
+    beforeEach(() => jest.clearAllMocks());
+    it('should execute command', async () => {
+      const eventHandler = new EventHandler(mockDiscordClient as Client);
+      await eventHandler.interactionCreate({
+        commandName: 'randomCommand',
+        isCommand: () => true,
+        isSelectMenu: jest.fn()
+      } as any);
+
+      expect(mockExecute).toHaveBeenCalled();
+    });
+
+    it('should not execute command', async () => {
+      const eventHandler = new EventHandler(mockDiscordClient as Client);
+      await eventHandler.interactionCreate({
+        isCommand: () => false,
+        isSelectMenu: jest.fn()
+      } as any);
+
+      expect(mockExecute).toHaveBeenCalledTimes(0);
+    });
+
+    it('should defer reply if interaction is defer menu', () => {});
   });
 });
