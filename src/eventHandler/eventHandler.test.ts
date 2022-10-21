@@ -13,6 +13,11 @@ jest.mock('../commands/commandFiles', () => ({
     }
   }
 }));
+jest.mock('../interactionHandler/interactionHandler', () =>
+  jest.fn().mockImplementation(() => ({
+    handleSelectMenuInteractionEvent: mockHandleSelectMenuInteractionEvent
+  }))
+);
 jest.mock('../httpService/http');
 jest.mock('../getConfig');
 
@@ -22,6 +27,9 @@ const mockDiscordClientFilter = jest.fn();
 const mockDiscordClientSend = jest.fn();
 const mockHttpRequest = httpRequest as jest.Mock<any>;
 const mockConfig = getConfig as jest.Mock<any>;
+const mockHandleSelectMenuInteractionEvent = jest.fn();
+const mockDeferReply = jest.fn();
+const mockDeleteReply = jest.fn();
 const mockDiscordClient: Partial<Client> = {
   channels: {
     cache: {
@@ -148,6 +156,22 @@ describe('eventHandler', () => {
       expect(mockExecute).toHaveBeenCalledTimes(0);
     });
 
-    it('should defer reply if interaction is defer menu', () => {});
+    it('should handle the select menu event correctly', async () => {
+      const eventHandler = new EventHandler(mockDiscordClient as Client);
+      const interactionObj = {
+        isCommand: () => false,
+        isSelectMenu: () => true,
+        deferReply: mockDeferReply,
+        deleteReply: mockDeleteReply,
+        customId: '1234'
+      } as any;
+      await eventHandler.interactionCreate(interactionObj);
+
+      expect(mockDeferReply).toHaveBeenCalled();
+      expect(mockDeleteReply).toHaveBeenCalled();
+      expect(mockHandleSelectMenuInteractionEvent).toHaveBeenCalledWith(
+        interactionObj
+      );
+    });
   });
 });

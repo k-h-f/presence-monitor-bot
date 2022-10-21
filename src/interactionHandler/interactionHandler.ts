@@ -18,13 +18,12 @@ class InteractionHandler {
   }
 
   public async handleSelectMenuInteractionEvent(
-    customId: string,
     interaction: SelectMenuInteraction
   ) {
     const { PRESENCE_API_URL } = getConfig();
 
     let body = {};
-    switch (customId) {
+    switch (interaction.customId) {
       case this.customIds.SELECT_BOT:
         body = { ...body, bots: interaction.values };
         break;

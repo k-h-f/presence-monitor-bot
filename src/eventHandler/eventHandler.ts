@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import { getConfig } from '../getConfig';
 import * as commandModules from '../commands/commandFiles';
-import InteractionHandler from './interactionHandler';
+import InteractionHandler from '../interactionHandler/interactionHandler';
 import { httpRequest } from '../httpService/http';
 import { MonitoringResponse } from '../httpService/responseTypes';
 
@@ -87,10 +87,7 @@ class EventHandler {
 
       const interactionHandler = new InteractionHandler();
 
-      interactionHandler.handleSelectMenuInteractionEvent(
-        interaction.customId,
-        interaction
-      );
+      interactionHandler.handleSelectMenuInteractionEvent(interaction);
 
       await interaction.deleteReply();
     }

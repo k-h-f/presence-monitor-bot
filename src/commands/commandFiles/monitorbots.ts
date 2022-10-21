@@ -6,7 +6,7 @@ import {
   SelectMenuBuilder,
   SlashCommandBuilder
 } from 'discord.js';
-import InteractionHandler from '../../eventHandler/interactionHandler';
+import InteractionHandler from '../../interactionHandler/interactionHandler';
 
 import { getConfig } from '../../getConfig';
 import { httpRequest } from '../../httpService/http';
