@@ -62,7 +62,9 @@ class EventHandler {
     const { bots, channelId } = monitoredBots;
 
     const isMonitored = bots.includes(data.member.id);
-    if (data.status === PresenceUpdateStatus.Offline && isMonitored) {
+    //PresenceUpdateStatus checks Online because it is reporting where the update took place
+    //Rather than what the current update is
+    if (data.status === PresenceUpdateStatus.Online && isMonitored) {
       const channel = this.client.channels.cache.get(channelId) as TextChannel;
 
       if (!channel) {
@@ -70,7 +72,6 @@ class EventHandler {
         const defaultChannel = this.client.channels.cache
           .filter((channel) => channel.isTextBased())
           .at(0) as TextChannel;
-
         defaultChannel.send(`${data.member.displayName} is offline!`);
       } else {
         channel.send(`${data.member.displayName} is offline!`);
