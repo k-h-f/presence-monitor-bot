@@ -72,9 +72,9 @@ class EventHandler {
         const defaultChannel = this.client.channels.cache
           .filter((channel) => channel.isTextBased())
           .at(0) as TextChannel;
-        defaultChannel.send(`${data.member.displayName} is offline!`);
+        defaultChannel.send(`@everyone ${data.member.displayName} is offline!`);
       } else {
-        channel.send(`${data.member.displayName} is offline!`);
+        channel.send(`@everyone ${data.member.displayName} is offline!`);
       }
     }
   }

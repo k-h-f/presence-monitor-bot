@@ -49,7 +49,9 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
     };
   });
 
-  const embed = new EmbedBuilder().setTitle('Select bots to monitor');
+  const embed = new EmbedBuilder().setTitle(
+    'Select bots to monitor and the channel to send alerts'
+  );
 
   const selectBotsRow = new ActionRowBuilder().addComponents(
     new SelectMenuBuilder()

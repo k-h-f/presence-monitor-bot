@@ -88,7 +88,7 @@ describe('eventHandler', () => {
       });
       const eventHandler = new EventHandler(mockDiscordClient as Client);
       await eventHandler.presenceUpdate({
-        status: 'offline',
+        status: 'online',
         guild: { id: '1' } as Partial<Guild>,
         member: {
           displayName: 'monitored bot',
@@ -101,7 +101,7 @@ describe('eventHandler', () => {
 
       expect(mockDiscordClientGet).toHaveBeenCalledWith('channelId456');
       expect(mockDiscordClientSend).toHaveBeenCalledWith(
-        'monitored bot is offline!'
+        '@everyone monitored bot is offline!'
       );
     });
 
@@ -115,7 +115,7 @@ describe('eventHandler', () => {
 
       const eventHandler = new EventHandler(mockDiscordClient as Client);
       await eventHandler.presenceUpdate({
-        status: 'offline',
+        status: 'online',
         guild: { id: '1' } as Partial<Guild>,
         member: {
           displayName: 'monitored bot',
@@ -128,7 +128,7 @@ describe('eventHandler', () => {
 
       expect(mockDiscordClientFilter).toHaveBeenCalled();
       expect(mockDiscordClientSend).toHaveBeenCalledWith(
-        'monitored bot is offline!'
+        '@everyone monitored bot is offline!'
       );
     });
   });
