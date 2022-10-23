@@ -24,7 +24,9 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
 
   //Get all bots from server
   const members = await interaction.guild?.members.fetch();
-  const bots = members?.filter((member) => member.user.bot);
+  const bots = members?.filter(
+    (member) => member.user.bot && member.user.id !== '1025770076026183791'
+  );
 
   //Get all bots that is being monitored right now
   const monitoredInfo: MonitoringResponse = await httpRequest(
