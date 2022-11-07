@@ -49,6 +49,8 @@ class EventHandler {
   }
 
   async presenceUpdate(data: Presence | null) {
+    console.log(JSON.stringify(data, undefined, 4));
+
     if (
       !data ||
       !data.member ||
@@ -62,6 +64,11 @@ class EventHandler {
     const { PRESENCE_API_URL } = getConfig();
     const monitoredBots: MonitoringResponse = await httpRequest(
       'GET',
+      `${PRESENCE_API_URL}/monitoring/${data.guild.id}`
+    );
+
+    console.log(
+      'URL being used: ',
       `${PRESENCE_API_URL}/monitoring/${data.guild.id}`
     );
 
