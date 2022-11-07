@@ -49,14 +49,20 @@ class EventHandler {
   }
 
   async presenceUpdate(data: Presence | null) {
-    if (!data || !data.member || !data.member.user.bot) {
+    if (
+      !data ||
+      !data.member ||
+      !data.member.user.bot ||
+      !data ||
+      !data.guild
+    ) {
       return;
     }
 
     const { PRESENCE_API_URL } = getConfig();
     const monitoredBots: MonitoringResponse = await httpRequest(
       'GET',
-      `${PRESENCE_API_URL}/monitoring/${data.guild?.id}`
+      `${PRESENCE_API_URL}/monitoring/${data.guild.id}`
     );
 
     const { bots, channelId } = monitoredBots;
