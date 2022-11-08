@@ -97,7 +97,14 @@ class EventHandler {
 
       interactionHandler.handleSelectMenuInteractionEvent(interaction);
 
-      await interaction.deleteReply();
+      try {
+        await interaction.deleteReply();
+      } catch (error) {
+        await interaction.followUp({
+          content: `Saved`,
+          ephemeral: true
+        });
+      }
     }
 
     if (!interaction.isCommand()) {
