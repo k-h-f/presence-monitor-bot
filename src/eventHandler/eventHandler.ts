@@ -74,6 +74,10 @@ class EventHandler {
 
     const { bots, channelId } = monitoredBots;
 
+    if (!bots) {
+      return;
+    }
+
     const isMonitored = bots.includes(data.member.id);
     //PresenceUpdateStatus checks Online because it is reporting where the update took place
     //Rather than what the current update is
