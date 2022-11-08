@@ -52,7 +52,9 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
   });
 
   const embed = new EmbedBuilder().setTitle(
-    'Select bots to monitor and the channel to send alerts'
+    !botOptions
+      ? 'Select bots to monitor and the channel to send alerts'
+      : 'There are no discord bots on this server. I can only monitor discord bots if they are on this server. Please invite them to this server and try again'
   );
 
   const selectBotsRow = new ActionRowBuilder().addComponents(
@@ -101,6 +103,8 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
   await interaction.reply({
     ephemeral: true,
     embeds: [embed],
-    components: [selectBotsRow as any, selectChannelRow as any]
+    components: !botOptions
+      ? [selectBotsRow as any, selectChannelRow as any]
+      : []
   });
 };
