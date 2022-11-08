@@ -51,13 +51,7 @@ class EventHandler {
   async presenceUpdate(data: Presence | null) {
     console.log(JSON.stringify(data, undefined, 4));
 
-    if (
-      !data ||
-      !data.member ||
-      !data.member.user.bot ||
-      !data ||
-      !data.guild
-    ) {
+    if (!data || !data.member || !data.guild || !data.guild.id) {
       return;
     }
 
@@ -73,10 +67,6 @@ class EventHandler {
     );
 
     const { bots, channelId } = monitoredBots;
-
-    if (!bots) {
-      return;
-    }
 
     const isMonitored = bots.includes(data.member.id);
     //PresenceUpdateStatus checks Online because it is reporting where the update took place
