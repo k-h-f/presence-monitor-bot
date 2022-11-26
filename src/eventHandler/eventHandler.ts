@@ -101,7 +101,7 @@ class EventHandler {
         await interaction.deleteReply();
       } catch (error) {
         await interaction.followUp({
-          content: `Saved`,
+          content: `Saved your changes`,
           ephemeral: true
         });
       }
