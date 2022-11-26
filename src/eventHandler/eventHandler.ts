@@ -49,14 +49,21 @@ class EventHandler {
   }
 
   async presenceUpdate(data: Presence | null) {
-    if (!data || !data.member || !data.member.user.bot) {
+    console.log(JSON.stringify(data, undefined, 4));
+
+    if (!data || !data.member || !data.guild || !data.guild.id) {
       return;
     }
 
     const { PRESENCE_API_URL } = getConfig();
     const monitoredBots: MonitoringResponse = await httpRequest(
       'GET',
-      `${PRESENCE_API_URL}/monitoring/${data.guild?.id}`
+      `${PRESENCE_API_URL}/monitoring/${data.guild.id}`
+    );
+
+    console.log(
+      'URL being used: ',
+      `${PRESENCE_API_URL}/monitoring/${data.guild.id}`
     );
 
     const { bots, channelId } = monitoredBots;
@@ -93,9 +100,10 @@ class EventHandler {
       try {
         await interaction.deleteReply();
       } catch (error) {
-        await interaction.reply(
-          'Saved your changes - btw I can delete this message automatically if you give me Manage Messages permission. I will only use it for this purpose'
-        );
+        await interaction.followUp({
+          content: `Saved your changes`,
+          ephemeral: true
+        });
       }
     }
 
