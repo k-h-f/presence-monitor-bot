@@ -48,8 +48,6 @@ mockDiscordClientGet.mockImplementation(() => ({
 }));
 
 describe('eventHandler', () => {
-  beforeEach(() => {});
-
   describe('presenceUpdate', () => {
     beforeEach(() => {
       mockConfig.mockReturnValue({ PRESENCE_API_URL: 'presence-api.com' });

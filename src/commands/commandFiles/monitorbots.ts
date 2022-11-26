@@ -24,7 +24,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
 
   //Get all bots from server
   const members = await interaction.guild?.members.fetch();
-  const bots = members?.filter(
+  const botsFromServer = members?.filter(
     (member) => member.user.bot && member.user.id !== '1025770076026183791'
   );
 
@@ -34,14 +34,14 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
     `${PRESENCE_API_URL}/monitoring/${interaction.guildId}`
   );
 
-  if (!bots) {
+  if (!botsFromServer) {
     interaction.reply(
       'Something went wrong... Could not find bots using Discord API'
     );
     return;
   }
 
-  const botOptions = bots.map((bot) => {
+  const botOptions = botsFromServer.map((bot) => {
     return {
       label: bot.displayName,
       value: bot.id,
@@ -52,9 +52,9 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
   });
 
   const embed = new EmbedBuilder().setTitle(
-    !botOptions
-      ? 'Select bots to monitor and the channel to send alerts'
-      : 'There are no discord bots on this server. I can only monitor discord bots if they are on this server. Please invite them to this server and try again'
+    botsFromServer.size === 0
+      ? 'There are no discord bots on this server. I can only monitor discord bots if they are on this server. Please invite them to this server and try again'
+      : ' Select bots to monitor and the channel to send alerts'
   );
 
   const selectBotsRow = new ActionRowBuilder().addComponents(
@@ -103,8 +103,8 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
   await interaction.reply({
     ephemeral: true,
     embeds: [embed],
-    components: !botOptions
-      ? [selectBotsRow as any, selectChannelRow as any]
-      : []
+    ...(botsFromServer.size === 0
+      ? {}
+      : { components: [selectBotsRow as any, selectChannelRow as any] })
   });
 };

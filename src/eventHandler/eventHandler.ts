@@ -90,7 +90,13 @@ class EventHandler {
 
       interactionHandler.handleSelectMenuInteractionEvent(interaction);
 
-      await interaction.deleteReply();
+      try {
+        await interaction.deleteReply();
+      } catch (error) {
+        await interaction.reply(
+          'Saved your changes - btw I can delete this message automatically if you give me Manage Messages permission. I will only use it for this purpose'
+        );
+      }
     }
 
     if (!interaction.isCommand()) {
